@@ -1,5 +1,6 @@
 class DebtController < ApplicationController
   before_action :load_borrower
+  before_action :load_debt, except: [:index, :create]
 
   def index
     render json: { debts: @borrower.debts }, status: :ok
@@ -24,12 +25,25 @@ class DebtController < ApplicationController
   end
 
   def show
-    @debt = @borrower.debts.find_by(id: params[:id])
+    render json: { debt: @debt }, status: :ok
+  end
 
-    if @debt
+  def autofill
+    begin
+      @debt.autofill!
       render json: { debt: @debt }, status: :ok
-    else
-      render json: { error: "Debt not found" }, status: :not_found
+    rescue Debt::DebtServiceError => e
+      render json: { errors: e }, status: :service_unavailable
+    end
+  end
+
+  def payoff_amount
+    num_days_before_payoff = params[:num_days_before_payoff] || Debt::DEFAULT_NUM_DAYS_BEFORE_PAYOFF
+
+    begin
+      render json: { payoff_amount: @debt.payoff_amount(num_days_before_payoff) }, status: :ok
+    rescue ArgumentError => e
+      render json: { errors: e }, status: :internal_server_error
     end
   end
 
@@ -40,6 +54,14 @@ class DebtController < ApplicationController
 
     if @borrower.nil?
       render json: {error: "Borrower not found" }, status: :not_found
+    end
+  end
+
+  def load_debt
+    @debt = @borrower.debts.find_by(id: params[:debt_id] || params[:id])
+
+    if @debt.nil?
+      render json: {error: "Debt not found" }, status: :not_found
     end
   end
 end
