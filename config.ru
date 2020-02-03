@@ -1,4 +1,5 @@
-# This file is used by Rack-based servers to start the application.
+ #add some notes 
+#Type a message file is used by Rack-based servers to start the application.
 
 require_relative 'config/environment'
 
