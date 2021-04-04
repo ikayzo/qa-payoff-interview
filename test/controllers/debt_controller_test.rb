@@ -55,4 +55,23 @@ class DebtControllerTest < ActionDispatch::IntegrationTest
     assert_equal debt.as_json, JSON.parse(@response.body)["debt"]
   end
 
+  test "autofill" do
+    if ENV["SERVICE_CREDENTIALS"].nil?
+      skip("Service credentials not set. Skipping")
+    end
+
+    debt = debts.last
+
+    put borrower_debt_autofill_url(borrower_id: debt.borrower.id, debt_id: debt.id), as: :json
+    assert_response :ok
+  end
+
+  test "payoff_amount" do
+    debt = debts.last
+
+    get borrower_debt_payoff_amount_url(borrower_id: debt.borrower.id, debt_id: debt.id), as: :json
+
+    assert_response :ok
+    assert_equal debt.payoff_amount.as_json, JSON.parse(@response.body)["payoff_amount"]
+  end
 end
