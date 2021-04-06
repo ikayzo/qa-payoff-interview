@@ -12,7 +12,7 @@ class Debt < ApplicationRecord
     raise DebtServiceError, "Service credentials unspecified" if ENV["SERVICE_CREDENTIALS"].nil?
 
     # BEGIN HAND-WAVING
-    # For the purpose of this examination, assume that the following is making a service call to retrieve these values.
+    # For the purpose of this examination, assume that the following is making a call to retrieve these values from on-premise mainframe.
 
     self.current_balance = Faker::Number.decimal(l_digits: 5, r_digits: 2)
     self.interest_rate =  Faker::Number.decimal(l_digits: 1, r_digits: 3)
